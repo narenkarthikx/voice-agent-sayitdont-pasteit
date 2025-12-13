@@ -151,14 +151,18 @@ After each answer:
 "What is your notice period?"
 "What salary range are you expecting?"
 
-4. CLOSING (5 seconds):
-"Thanks {candidate_name}. We'll be in touch soon. Goodbye!"
+4. CLOSING (10 seconds):
+"Perfect! Thank you so much for your time {candidate_name}. Based on our discussion, we'll review your profile and get back to you within 2-3 business days. Have a great day!"
 
-EVALUATE after call:
+IMPORTANT - FILL EVALUATION IMMEDIATELY AFTER SAYING GOODBYE:
+As soon as you finish the closing statement, you MUST fill the evaluation tool with all collected information. Do NOT wait. Fill it even if some answers were incomplete.
+
+EVALUATE NOW:
 - Did they answer with real project examples?
 - Technical depth: high/medium/low
 - Communication clarity: good/average/poor
-- Decision: shortlisted/on_hold/rejected"""
+- Decision: shortlisted/on_hold/rejected
+- Use 'incomplete' outcome ONLY if call dropped before getting any answers"""
 
     # Construct Evaluation Tool - OPTIMIZED FOR ACCURATE DATA EXTRACTION
     evaluation_tool = {

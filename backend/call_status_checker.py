@@ -91,17 +91,29 @@ async def check_call_status():
                                         end_reason = last_reason
                                 
                                 if call_ended:
-                                    # Build comprehensive transcript
-                                    transcript_entries = transcription_data.get("entries", [])
+                                    # Build comprehensive transcript - check multiple locations
+                                    transcript_entries = (
+                                        transcription_data.get("entries", []) or
+                                        transcription_data.get("transcripts", []) or
+                                        call_details.get("transcripts", [])
+                                    )
                                     print(f"📝 Found {len(transcript_entries)} transcript entries")
                                     
+                                    transcript_text = ""
                                     if transcript_entries:
-                                        transcript_text = "\n\n".join([
-                                            f"{entry.get('role', 'unknown').upper()}: {entry.get('text', '')}"
-                                            for entry in transcript_entries
-                                        ])
+                                        # Handle both formats: entries with role/text or simple text array
+                                        formatted_entries = []
+                                        for entry in transcript_entries:
+                                            if isinstance(entry, dict):
+                                                role = entry.get('role', 'unknown').upper()
+                                                text = entry.get('text', '')
+                                                if text:
+                                                    formatted_entries.append(f"{role}: {text}")
+                                            elif isinstance(entry, str):
+                                                formatted_entries.append(entry)
+                                        transcript_text = "\n\n".join(formatted_entries) if formatted_entries else "Call completed but transcript not available"
                                     else:
-                                        transcript_text = "Call ended before transcript was generated"
+                                        transcript_text = "Call ended - transcript not available"
                                     
                                     # Extract outcome details - check multiple possible locations
                                     # Try outcomes_data first, then summary_data, then call_details
@@ -110,6 +122,13 @@ async def check_call_status():
                                         summary_data.get("summary") or 
                                         call_details.get("summary", "")
                                     )
+                                    
+                                    # Generate fallback summary from transcript if no summary provided
+                                    if not summary_text and transcript_text and transcript_text != "Call ended - transcript not available":
+                                        summary_text = f"Voice screening call conducted. {transcript_text[:300]}... (Full conversation in transcript)"
+                                    elif not summary_text:
+                                        summary_text = f"Call ended with reason: {end_reason}. No detailed summary available."
+                                    
                                     outcome = outcomes_data.get("outcome", "incomplete")
                                     match_score = outcomes_data.get("match_score") or outcomes_data.get("matchScore", "")
                                     availability = outcomes_data.get("availability", "")
