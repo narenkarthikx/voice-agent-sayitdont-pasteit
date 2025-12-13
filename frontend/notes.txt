@@ -1,0 +1,6 @@
+create users collection in mongodb
+{
+  "username": "admin",
+  "password": "password123",
+  "password_hash": "$2b$12$cIwBnrOjHrMUq6DBqH7Dcez3lXXoV2Vvn9H55zaSSZmJ0YAe0luVy"
+}
