@@ -1,8 +1,9 @@
 fastapi
-uvicorn
+uvicorn[standard]
 motor
 pydantic[email]
 email-validator
+pymongo[srv]==4.6.1
 python-multipart
 python-jose[cryptography]
 passlib[bcrypt]
