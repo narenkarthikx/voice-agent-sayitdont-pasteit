@@ -1,12 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
-import Login from './pages/Login';
+
 import Dashboard from './pages/Dashboard';
 import Candidates from './pages/Candidates';
 import Jobs from './pages/Jobs';
 import CallHistory from './pages/CallHistory';
 import Layout from './components/Layout';
+import LandingPage from './pages/LandingPage';
 import './index.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -27,7 +28,7 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-import LandingPage from './pages/LandingPage';
+
 
 function AppRoutes() {
   return (

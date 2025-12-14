@@ -161,6 +161,7 @@ async def trigger_call(id: str, current_user: dict = Depends(get_current_user)):
     - "How do you handle tight deadlines or pressure at work?"
 
     5. MOTIVATION & FIT:
+    
     - "What interests you about this {job_details} role?"
     - "Why are you considering a job change now?"
 
@@ -261,20 +262,27 @@ async def trigger_call(id: str, current_user: dict = Depends(get_current_user)):
                 call_result = await calls_collection.insert_one(new_call)
                 call_id = call_result.inserted_id
 
+                # Sanitize phone number (remove spaces, ensure E.164)
+                phone_number = candidate.get("phone", "").replace(" ", "").strip()
+                
+                payload = {
+                    "phoneNumber": phone_number,
+                    "prompt": prompt,  
+                    "initialMessage": f"Hi {candidate_name}, this is Anitha from Say It Don't Paste It. I'm calling about the {job_details} opportunity. Is this a good time for a quick 4-minute chat?",
+                    "evaluation_tool": evaluation_tool, 
+                    "voice": "nat", # using standard voice ID
+                    "maxDuration": 5
+                }
+                
+                print(f"DEBUG: Sending Payload to Voice API: {payload.keys()} | Phone: {phone_number}")
+
                 response = await client.post(
                     "https://api-dinodial-proxy.cyces.co/api/proxy/make-call/",
                     headers={
                         "Authorization": f"Bearer {dinodial_api_key}",
                         "Content-Type": "application/json"
                     },
-                    json={
-                        "phoneNumber": candidate.get("phone"),
-                        "systemPrompt": prompt,  # We use the detailed prompt constructed above
-                        "initialMessage": f"Hi {candidate_name}, this is Anitha from Say It Don't Paste It. I'm calling about the {job_details} opportunity. Is this a good time for a quick 4-minute chat?",
-                        "tools": [evaluation_tool], # Pass the evaluation tool
-                        "voice": "Anitha", # or other available voices
-                        "maxDuration": 5 # minutes
-                    },
+                    json=payload,
                     timeout=30.0
                 )
                 
@@ -327,7 +335,10 @@ async def trigger_call(id: str, current_user: dict = Depends(get_current_user)):
 
                 return {"message": "Call initiated successfully", "call_id": str(call_id), "external_id": external_id}
 
+            except HTTPException as he:
+                # Re-raise HTTP exceptions (like 429) as-is
+                raise he
             except Exception as e:
                 print(f"Error initiating call: {e}")
-                # Clean up if call wasn't created properly
+                # This catches unexpected server errors
                 raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
