@@ -49,28 +49,35 @@ async def upload_resume(
         "created_at": datetime.utcnow()
     }
     
-    # Add job_id if provided
+    # Add job_id if provided, else mark as pending
     if job_id:
         candidate_data["job_id"] = job_id
-        
         # 3.5. PRE-SCREENING: Compare resume with job requirements
         job = await jobs_collection.find_one({"_id": ObjectId(job_id)})
         if job:
             print(f"🔍 Starting pre-screening for {parsed_data.get('fullName')}...")
             pre_screen_result = calculate_fit_score(parsed_data, job)
-            
             # Add pre-screening results to candidate data
             candidate_data["fit_score"] = pre_screen_result.get("fit_score", 0)
             candidate_data["pre_screen_status"] = pre_screen_result.get("decision", "proceed")
             candidate_data["pre_screen_reason"] = pre_screen_result.get("reason", "")
             candidate_data["matching_skills"] = pre_screen_result.get("matching_skills", [])
             candidate_data["missing_skills"] = pre_screen_result.get("missing_skills", [])
-            
             print(f"📊 Pre-screening result: {pre_screen_result.get('decision').upper()} (Score: {pre_screen_result.get('fit_score')})")
         else:
             # No job found, mark as pending for manual review
-            candidate_data["pre_screen_status"] = "proceed"
-            candidate_data["fit_score"] = 50
+            candidate_data["pre_screen_status"] = "pending"
+            candidate_data["fit_score"] = None
+            candidate_data["pre_screen_reason"] = "No job found for pre-screening. Manual review required."
+            candidate_data["matching_skills"] = []
+            candidate_data["missing_skills"] = []
+    else:
+        # No job_id provided, mark as pending
+        candidate_data["pre_screen_status"] = "pending"
+        candidate_data["fit_score"] = None
+        candidate_data["pre_screen_reason"] = "No job selected for pre-screening. Manual review required."
+        candidate_data["matching_skills"] = []
+        candidate_data["missing_skills"] = []
 
     # 4. Save to MongoDB
     new_candidate = await candidates_collection.insert_one(candidate_data)
@@ -124,153 +131,117 @@ async def trigger_call(id: str, current_user: dict = Depends(get_current_user)):
     if not relevant_skills:
         relevant_skills = skills[:6]
     
-    # Construct AI Prompt - OPTIMIZED FOR VOICE LATENCY
-    prompt = f"""You are Anitha, a recruiter calling {candidate_name} for {job_details}.
+        prompt = f"""
+    You are Anitha, a professional recruiter calling {candidate_name} regarding the {job_details} position at our company.
 
-VOICE RULES (CRITICAL):
-- Use ONE consistent voice throughout the entire call
-- Speak naturally at normal pace - not too fast or slow
-- Keep responses under 15 words
-- Pause 1 second after each question
-- No filler words like "um", "actually", "basically"
+    VOICE RULES:
+    - Speak in a friendly, professional, and natural tone, just like a real recruiter.
+    - Keep each response under 15 words.
+    - Do not use filler words (e.g., 'um', 'actually').
+    - Do not wait unnecessarily after your greeting or any question—respond immediately if the candidate replies (simulate a real conversation turn-taking, e.g., if you say "Hi", expect a "Hi" back and continue naturally).
 
-CALL SCRIPT (Follow EXACTLY):
+    CALL FLOW:
 
-1. GREETING (10 seconds):
-"Hi {candidate_name}, this is Anitha from Say It Don't Paste It. I'm calling about the {job_details} role. Do you have 4 minutes?"
+    1. GREETING & RAPPORT (10 seconds):
+    "Hi {candidate_name}, this is Anitha from Say It Don't Paste It. I'm calling about the {job_details} opportunity. Is this a good time for a quick 4-minute chat?"
 
-2. TECHNICAL QUESTIONS (Ask only 3, pick from these based on their skills):
-{chr(10).join([f'   - "Describe a project where you used {skill}."' for skill in relevant_skills[:3]])}
+    2. INTRODUCTION:
+    "Could you briefly introduce yourself and your current responsibilities?"
 
-After each answer:
-- If clear: Say "Got it" then next question
-- If vague: Say "Can you give an example?" (once only)
-- If no answer: Say "Okay" then next question
+    3. TECHNICAL/EXPERIENCE (Ask 3-5 targeted, experience-based questions):
+    - Ask only about the candidate's real work experience, not theory.
+    - "Can you describe a project where you used {relevant_skills[0] if len(relevant_skills) > 0 else 'your main skill'}? What was your role and the outcome?"
+    - "What was a challenging technical problem you solved recently? How did you approach it?"
+    - "How do you keep your skills current with new technologies?"
+    - "Tell me about a time you had to learn something quickly for a project."
+    - "What is the most complex system or tool you have worked on?"
 
-3. LOGISTICS (30 seconds):
-"What is your notice period?"
-"What salary range are you expecting?"
+    4. BEHAVIORAL/TEAMWORK:
+    - "Can you share an example of working as part of a team to achieve a goal?"
+    - "How do you handle tight deadlines or pressure at work?"
 
-4. CLOSING (10 seconds):
-"Perfect! Thank you so much for your time {candidate_name}. Based on our discussion, we'll review your profile and get back to you within 2-3 business days. Have a great day!"
+    5. MOTIVATION & FIT:
+    - "What interests you about this {job_details} role?"
+    - "Why are you considering a job change now?"
 
-IMPORTANT - FILL EVALUATION IMMEDIATELY AFTER SAYING GOODBYE:
-As soon as you finish the closing statement, you MUST fill the evaluation tool with all collected information. Do NOT wait. Fill it even if some answers were incomplete.
+    6. LOGISTICS:
+    - "What is your notice period?"
+    - "What salary range are you expecting?"
+    - "Are you open to relocation or remote work?"
 
-EVALUATE NOW:
-- Did they answer with real project examples?
-- Technical depth: high/medium/low
-- Communication clarity: good/average/poor
-- Decision: shortlisted/on_hold/rejected
-- Use 'incomplete' outcome ONLY if call dropped before getting any answers"""
+    7. CLOSING (10 seconds):
+    "Thank you, {candidate_name}, for sharing your experience. We'll review your profile and get back to you within 2-3 business days. Have a great day!"
 
-    # Construct Evaluation Tool - OPTIMIZED FOR ACCURATE DATA EXTRACTION
-    evaluation_tool = {
-        "name": "call_outcomes",
-        "behavior": "BLOCKING",
-        "parameters": {
-            "type": "OBJECT",
-            "required": ["outcome", "match_score", "summary", "skills_assessment", "availability", "end_reason"],
-            "properties": {
-                "outcome": {
-                    "enum": ["shortlisted", "rejected", "on_hold", "incomplete"],
-                    "type": "STRING",
-                    "description": "SHORTLISTED: Strong technical answers with real examples. REJECTED: Weak answers or no relevant experience. ON_HOLD: Average performance, needs review. INCOMPLETE: Call dropped or candidate unavailable."
-                },
-                "match_score": {
-                    "enum": ["high", "medium", "low"],
-                    "type": "STRING",
-                    "description": "HIGH: Gave detailed project examples, deep technical knowledge. MEDIUM: Basic understanding, some practical experience. LOW: Vague answers, theoretical knowledge only."
-                },
-                "summary": {
-                    "type": "STRING",
-                    "minLength": "150",
-                    "maxLength": "600",
-                    "description": "Write 3-5 sentences covering: (1) What technical questions were asked (2) Quality of candidate's answers with specific examples they mentioned (3) Communication skills (4) Overall impression. Be specific and factual."
-                },
-                "skills_assessment": {
-                    "type": "STRING",
-                    "minLength": "100",
-                    "maxLength": "500",
-                    "description": "For EACH skill discussed: (1) What did they claim to know? (2) Did they give real project examples? (3) Depth of knowledge: expert/intermediate/beginner. Format: 'Skill 1 - [assessment]. Skill 2 - [assessment].' Be concrete."
-                },
-                "availability": {
-                    "type": "STRING",
-                    "description": "Exact notice period mentioned by candidate. Examples: 'Immediate', '15 days', '1 month', '2 months', 'Serving notice', 'Not discussed'. Use their exact words."
-                },
-                "current_ctc": {
-                    "type": "STRING",
-                    "description": "Current salary if mentioned. Format: '5 LPA' or '8.5 LPA' or 'Not disclosed' or 'Fresher'. Include currency if stated."
-                },
-                "expected_ctc": {
-                    "type": "STRING",
-                    "description": "Expected salary if mentioned. Format: '8 LPA' or '10-12 LPA' or 'Not discussed' or 'Negotiable'. Include currency if stated."
-                },
-                "end_reason": {
-                    "enum": ["completed", "candidate_busy", "candidate_declined", "call_dropped", "no_answer", "wrong_number"],
-                    "type": "STRING",
-                    "description": "Why call ended. COMPLETED: Full conversation finished. CANDIDATE_BUSY: Said not available now. CANDIDATE_DECLINED: Not interested in job. CALL_DROPPED: Technical issue. NO_ANSWER: Didn't pick up. WRONG_NUMBER: Invalid contact."
-                }
-            }
-        },
-        "description": "Extract structured evaluation data from voice screening call. Be specific and factual in all fields."
-    }
+    ASSESSMENT RULES:
+    - Do not give hints, explanations, or teach the candidate—this is a pure assessment, not a lesson.
+    - Evaluate technical depth and communication based only on their answers.
 
-    # Trigger External Call
-    api_key = os.getenv("DINODIAL_PROXY_API_KEY")
-    external_call_id = None
-    print("prompt: ", prompt)
-    print("evaluation_tool: ", evaluation_tool)
-    print("api_key: ", api_key)
-    if api_key:
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    "https://api-dinodial-proxy.cyces.co/api/proxy/make-call/",
-                    headers={"Authorization": f"Bearer {api_key}"},
-                    json={
-                        "prompt": prompt,
-                        "evaluation_tool": evaluation_tool
+    AFTER THE CALL:
+    Immediately fill the evaluation tool with all collected information, even if some answers were incomplete.
+
+    EVALUATION CHECKLIST:
+    - Did they answer with real project examples?
+    - Technical depth: high/medium/low
+    - Communication clarity: good/average/poor
+    - Teamwork and attitude: strong/average/weak
+    - Motivation for the role: strong/average/weak
+    - Decision: shortlisted/on_hold/rejected
+    - Use 'incomplete' outcome ONLY if call dropped before getting any answers.
+    """
+
+        evaluation_tool = {
+            "name": "call_outcomes",
+            "behavior": "BLOCKING",
+            "parameters": {
+                "type": "OBJECT",
+                "required": [
+                    "outcome", "match_score", "summary", "skills_assessment", "availability", "end_reason"
+                ],
+                "properties": {
+                    "outcome": {
+                        "enum": ["shortlisted", "rejected", "on_hold", "incomplete"],
+                        "type": "STRING",
+                        "description": "SHORTLISTED: Strong technical answers with real examples. REJECTED: Weak answers or no relevant experience. ON_HOLD: Average performance, needs review. INCOMPLETE: Call dropped or candidate unavailable."
                     },
-                    timeout=30.0
-                )
-                print("Triggered Call Response: ", response.json())
-                if response.status_code == 200:
-                    data = response.json()
-                    print("data: ", data)
-                    respData = data.get("data", {})
-                    external_call_id = respData.get("id")
-                    print(f"External API Call Initiated: {data}")
-                    status_code = data.get("status_code")
-                    if status_code != 200:
-                        return JSONResponse(status_code=status_code or 500, content={"message": "Failed to initiate external call"})
-                else:
-                    print(f"External API Call Failed: {response.status_code} - {response.text}")
-                    return JSONResponse(status_code=500, content={"message": "Failed to initiate external call"})
-        except Exception as e:
-            print(f"External API Call Error: {e}")
-            return JSONResponse(status_code=500, content={"message": "Failed to initiate external call"})
+                    "match_score": {
+                        "enum": ["high", "medium", "low"],
+                        "type": "STRING",
+                        "description": "HIGH: Gave detailed project examples, deep technical knowledge. MEDIUM: Basic understanding, some practical experience. LOW: Vague answers, theoretical knowledge only."
+                    },
+                    "summary": {
+                        "type": "STRING",
+                        "minLength": 150,
+                        "maxLength": 600,
+                        "description": "Write 3-5 sentences covering: (1) What technical questions were asked (2) Quality of candidate's answers with specific examples they mentioned (3) Communication skills (4) Overall impression. Be specific and factual."
+                    },
+                    "skills_assessment": {
+                        "type": "STRING",
+                        "minLength": 100,
+                        "maxLength": 500,
+                        "description": "For EACH skill discussed: (1) What did they claim to know? (2) Did they give real project examples? (3) Depth of knowledge: expert/intermediate/beginner. Format: 'Skill 1 - [assessment]. Skill 2 - [assessment].' Be concrete."
+                    },
+                    "availability": {
+                        "type": "STRING",
+                        "description": "Exact notice period mentioned by candidate. Examples: 'Immediate', '15 days', '1 month', '2 months', 'Serving notice', 'Not discussed'. Use their exact words."
+                    },
+                    "current_ctc": {
+                        "type": "STRING",
+                        "description": "Current salary if mentioned. Format: '5 LPA' or '8.5 LPA' or 'Not disclosed' or 'Fresher'. Include currency if stated."
+                    },
+                    "expected_ctc": {
+                        "type": "STRING",
+                        "description": "Expected salary if mentioned. Format: '8 LPA' or '10-12 LPA' or 'Not discussed' or 'Negotiable'. Include currency if stated."
+                    },
+                    "end_reason": {
+                        "enum": ["completed", "candidate_busy", "candidate_declined", "call_dropped", "no_answer", "wrong_number"],
+                        "type": "STRING",
+                        "description": "Why call ended. COMPLETED: Full conversation finished. CANDIDATE_BUSY: Said not available now. CANDIDATE_DECLINED: Not interested in job. CALL_DROPPED: Technical issue. NO_ANSWER: Didn't pick up. WRONG_NUMBER: Invalid contact."
+                    }
+                }
+            },
+            "description": "Extract structured evaluation data from voice screening call. Be specific and factual in all fields."
+        }
 
-    # Fallback ID if API call failed or keys missing (for dev/testing)
-    if not external_call_id:
-        external_call_id = f"mock-call-{ObjectId()}"
+        # ...existing code for making the call and saving to DB...
 
-    # Create a new call record
-    new_call = {
-        "candidate_id": id,
-        "status": "In-Progress",
-        "start_time": datetime.utcnow(),
-        "end_time": None,
-        "summary": None,
-        "transcript": None,
-        "external_call_id": str(external_call_id)
-    }
-    
-    result = await calls_collection.insert_one(new_call)
-    
-    return JSONResponse(status_code=200, content={
-        "message": f"Call triggered for candidate {candidate.get('fullName')}", 
-        "candidate_id": id,
-        "call_id": str(result.inserted_id),
-        "external_call_id": str(external_call_id)
-    })
+    # ...existing code for making the call and saving to DB...

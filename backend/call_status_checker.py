@@ -140,27 +140,35 @@ async def check_call_status():
                                     print(f"💡 Extracted: outcome={outcome}, match_score={match_score}, summary_length={len(summary_text)}")
                                     
                                     # Construct comprehensive summary - handle empty data gracefully
-                                    if summary_text or skills_assessment or outcome != "incomplete":
-                                        final_summary = f"""🎯 OUTCOME: {outcome.upper()}
-📊 MATCH SCORE: {match_score.upper() if match_score else 'Not Assessed'}
-📅 AVAILABILITY: {availability or 'Not mentioned'}
-💰 CURRENT CTC: {current_ctc or 'Not disclosed'}
-💵 EXPECTED CTC: {expected_ctc or 'Not discussed'}
-🔚 CALL END: {call_end_reason}
+                                    if outcome == "incomplete":
+                                        # For incomplete calls, fill each field with a user-friendly default if missing (no emoji)
+                                        final_summary = f"""OUTCOME: {outcome.upper()}
+MATCH SCORE: {match_score.upper() if match_score else 'Not available – call incomplete'}
+AVAILABILITY: {availability if availability else 'Not available – call incomplete'}
+CURRENT CTC: {current_ctc if current_ctc else 'Not available – call incomplete'}
+EXPECTED CTC: {expected_ctc if expected_ctc else 'Not available – call incomplete'}
+CALL END: {call_end_reason if call_end_reason else 'Not available – call incomplete'}
 
-📋 SKILLS ASSESSMENT:
+SKILLS ASSESSMENT:
+{skills_assessment if skills_assessment else 'Not available – call incomplete'}
+
+DETAILED SUMMARY:
+{summary_text if summary_text else 'Call ended before AI screening could be completed. No detailed summary available.'}"""
+                                        transcript_text = None  # Remove transcript for incomplete calls
+                                    else:
+                                        final_summary = f"""OUTCOME: {outcome.upper()}
+MATCH SCORE: {match_score.upper() if match_score else 'Not Assessed'}
+AVAILABILITY: {availability or 'Not mentioned'}
+CURRENT CTC: {current_ctc or 'Not disclosed'}
+EXPECTED CTC: {expected_ctc or 'Not discussed'}
+CALL END: {call_end_reason}
+
+SKILLS ASSESSMENT:
 {skills_assessment or 'Assessment not completed - call ended early'}
 
-📝 DETAILED SUMMARY:
+DETAILED SUMMARY:
 {summary_text or 'Summary not generated - call ended prematurely'}"""
-                                    else:
-                                        # Call ended too early - create basic summary from transcript
-                                        final_summary = f"""⚠️ INCOMPLETE CALL
-🔚 END REASON: {call_end_reason}
 
-The call ended before AI screening could be completed.
-Manual review required - check transcript below."""
-                                    
                                     # Get recording URL - check multiple possible field names
                                     recording_url = (
                                         call_details.get("recordingUrl") or 

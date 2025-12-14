@@ -13,3 +13,6 @@ groq
 python-dotenv
 requests
 httpx==0.27.2
+pymongo==4.6.3
+dnspython==2.6.1
+
