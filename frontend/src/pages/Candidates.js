@@ -81,18 +81,18 @@ const Candidates = () => {
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold text-white">
             Candidate Pool
           </h2>
-          <p className="text-gray-600 mt-2">Upload resumes and initiate AI voice screenings</p>
+          <p className="text-gray-400 mt-2">Upload resumes and initiate AI voice screenings</p>
         </div>
         <div className="flex space-x-3">
           <button
             onClick={() => setShowUploadModal(true)}
-            className="flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg font-semibold transition-all"
+            className="flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-900/20 font-semibold transition-all"
           >
             <Upload className="w-5 h-5 mr-2" />
             Add Candidate
@@ -148,16 +148,16 @@ const Candidates = () => {
                         {candidate.fullName.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-gray-900">{candidate.fullName}</div>
-                        <div className="text-xs text-gray-500">{candidate.email}</div>
-                        <div className="text-xs text-gray-400">{candidate.phone}</div>
+                        <div className="text-sm font-semibold text-white">{candidate.fullName}</div>
+                        <div className="text-xs text-gray-400">{candidate.email}</div>
+                        <div className="text-xs text-gray-500">{candidate.phone}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center">
                       <div>
-                        <div className="text-sm font-semibold text-indigo-600">{jobTitle}</div>
+                        <div className="text-sm font-semibold text-indigo-400">{jobTitle}</div>
                         <div className="text-xs text-gray-500">{candidate.years_of_experience ? `${candidate.years_of_experience}+ years` : 'Fresher'}</div>
                       </div>
                     </div>
@@ -257,22 +257,22 @@ const Candidates = () => {
       {/* Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+          <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl w-full max-w-md p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Upload Candidate Resume</h3>
-              <button onClick={() => setShowUploadModal(false)} className="text-gray-500 hover:text-gray-700">
+              <h3 className="text-xl font-bold text-white">Upload Candidate Resume</h3>
+              <button onClick={() => setShowUploadModal(false)} className="text-gray-400 hover:text-white transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
-              <p className="text-xs text-indigo-800 font-semibold mb-1">🤖 AI Pre-Screening Enabled</p>
-              <p className="text-xs text-indigo-600">Resume will be automatically analyzed against job requirements. Only qualified candidates proceed to voice screening.</p>
+            <div className="mb-4 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
+              <p className="text-xs text-indigo-300 font-semibold mb-1">🤖 AI Pre-Screening Enabled</p>
+              <p className="text-xs text-indigo-400">Resume will be automatically analyzed against job requirements. Only qualified candidates proceed to voice screening.</p>
             </div>
             <form onSubmit={handleFileUpload}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Select Job Role (Required for AI Pre-Screening)</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Select Job Role (Required for AI Pre-Screening)</label>
                 <select
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  className="w-full px-3 py-2 bg-slate-800 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   value={selectedJob}
                   onChange={(e) => setSelectedJob(e.target.value)}
                 >
@@ -283,27 +283,27 @@ const Candidates = () => {
                 </select>
               </div>
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Resume (PDF)</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Resume (PDF)</label>
                 <input
                   id="resume-upload"
                   type="file"
                   accept=".pdf"
                   required
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-slate-800 border border-white/10 rounded-lg text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500"
                 />
               </div>
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setShowUploadModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="px-4 py-2 text-gray-400 hover:bg-white/5 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 disabled:opacity-50 transition-colors"
                 >
                   {uploading ? 'Uploading...' : 'Upload'}
                 </button>
@@ -315,45 +315,45 @@ const Candidates = () => {
 
       {/* View Details Modal */}
       {showDetailsModal && selectedCandidate && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900">{selectedCandidate.fullName}</h3>
-                <p className="text-gray-500">{selectedCandidate.email} • {selectedCandidate.phone}</p>
+                <h3 className="text-2xl font-bold text-white">{selectedCandidate.fullName}</h3>
+                <p className="text-gray-400">{selectedCandidate.email} • {selectedCandidate.phone}</p>
               </div>
-              <button onClick={() => setShowDetailsModal(false)} className="text-gray-500 hover:text-gray-700">
+              <button onClick={() => setShowDetailsModal(false)} className="text-gray-400 hover:text-white transition-colors">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
             {/* Pre-Screening Banner */}
             {selectedCandidate.pre_screen_status && (
-              <div className={`mb-6 p-4 rounded-xl border-2 ${selectedCandidate.pre_screen_status === 'proceed'
-                ? 'bg-green-50 border-green-200'
-                : 'bg-red-50 border-red-200'
+              <div className={`mb-6 p-4 rounded-xl border ${selectedCandidate.pre_screen_status === 'proceed'
+                ? 'bg-green-500/10 border-green-500/20'
+                : 'bg-red-500/10 border-red-500/20'
                 }`}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-bold text-gray-900 mb-1 flex items-center">
+                    <h4 className="font-bold text-white mb-1 flex items-center">
                       {selectedCandidate.pre_screen_status === 'proceed' ? '✓' : '✗'} Phase 1: AI Pre-Screening
                     </h4>
-                    <p className={`text-sm ${selectedCandidate.pre_screen_status === 'proceed' ? 'text-green-700' : 'text-red-700'
+                    <p className={`text-sm ${selectedCandidate.pre_screen_status === 'proceed' ? 'text-green-300' : 'text-red-300'
                       }`}>
                       {selectedCandidate.pre_screen_reason || 'Resume analyzed against job requirements'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-gray-900">{selectedCandidate.fit_score || 0}<span className="text-lg">/100</span></p>
-                    <p className="text-xs text-gray-500">Fit Score</p>
+                    <p className="text-3xl font-bold text-white">{selectedCandidate.fit_score || 0}<span className="text-lg">/100</span></p>
+                    <p className="text-xs text-gray-400">Fit Score</p>
                   </div>
                 </div>
                 {selectedCandidate.matching_skills && selectedCandidate.matching_skills.length > 0 && (
                   <div className="mt-3">
-                    <p className="text-xs text-green-700 font-semibold mb-1">Matching Skills:</p>
+                    <p className="text-xs text-green-300 font-semibold mb-1">Matching Skills:</p>
                     <div className="flex flex-wrap gap-1">
                       {selectedCandidate.matching_skills.map((skill, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-green-200 text-green-800 rounded text-xs font-medium">
+                        <span key={idx} className="px-2 py-0.5 bg-green-500/20 text-green-300 border border-green-500/30 rounded text-xs font-medium">
                           {skill}
                         </span>
                       ))}
@@ -362,10 +362,10 @@ const Candidates = () => {
                 )}
                 {selectedCandidate.missing_skills && selectedCandidate.missing_skills.length > 0 && (
                   <div className="mt-2">
-                    <p className="text-xs text-red-700 font-semibold mb-1">Missing Skills:</p>
+                    <p className="text-xs text-red-300 font-semibold mb-1">Missing Skills:</p>
                     <div className="flex flex-wrap gap-1">
                       {selectedCandidate.missing_skills.map((skill, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-red-200 text-red-800 rounded text-xs font-medium">
+                        <span key={idx} className="px-2 py-0.5 bg-red-500/20 text-red-300 border border-red-500/30 rounded text-xs font-medium">
                           {skill}
                         </span>
                       ))}
@@ -377,16 +377,16 @@ const Candidates = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-semibold text-gray-700 mb-2">Professional Summary</h4>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600"><span className="font-medium">Experience:</span> {selectedCandidate.years_of_experience} years ({selectedCandidate.exp_type})</p>
-                  <p className="text-sm text-gray-600 mt-1"><span className="font-medium">Job Role:</span> {jobs.find(j => j._id === selectedCandidate.job_id)?.title || 'General'}</p>
+                <h4 className="font-semibold text-gray-300 mb-2">Professional Summary</h4>
+                <div className="bg-slate-800/50 border border-white/5 p-4 rounded-lg">
+                  <p className="text-sm text-gray-300"><span className="font-medium">Experience:</span> {selectedCandidate.years_of_experience} years ({selectedCandidate.exp_type})</p>
+                  <p className="text-sm text-gray-300 mt-1"><span className="font-medium">Job Role:</span> {jobs.find(j => j._id === selectedCandidate.job_id)?.title || 'General'}</p>
                 </div>
 
-                <h4 className="font-semibold text-gray-700 mt-6 mb-2">Skills</h4>
+                <h4 className="font-semibold text-gray-300 mt-6 mb-2">Skills</h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedCandidate.skills.map((skill, index) => (
-                    <span key={index} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                    <span key={index} className="px-3 py-1 bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 rounded-full text-sm">
                       {skill}
                     </span>
                   ))}
@@ -394,27 +394,27 @@ const Candidates = () => {
               </div>
 
               <div>
-                <h4 className="font-semibold text-gray-700 mb-2">Experience</h4>
+                <h4 className="font-semibold text-gray-300 mb-2">Experience</h4>
                 <div className="space-y-4">
                   {selectedCandidate.experience.length > 0 ? (
                     selectedCandidate.experience.map((exp, index) => (
-                      <div key={index} className="border-l-2 border-blue-200 pl-4">
-                        <p className="font-medium text-gray-800">{exp.role || 'Role Unknown'}</p>
-                        <p className="text-sm text-blue-600">{exp.company || 'Company Unknown'}</p>
+                      <div key={index} className="border-l-2 border-indigo-500/30 pl-4">
+                        <p className="font-medium text-white">{exp.role || 'Role Unknown'}</p>
+                        <p className="text-sm text-indigo-400">{exp.company || 'Company Unknown'}</p>
                         <p className="text-xs text-gray-500">{exp.duration || ''}</p>
-                        {exp.description && <p className="text-sm text-gray-600 mt-1">{exp.description}</p>}
+                        {exp.description && <p className="text-sm text-gray-400 mt-1">{exp.description}</p>}
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-500">No detailed experience listed.</p>
+                    <p className="text-sm text-gray-400">No detailed experience listed.</p>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t">
-              <h4 className="font-semibold text-gray-700 mb-2">Resume Snippet</h4>
-              <div className="bg-gray-50 p-4 rounded-lg text-xs text-gray-600 font-mono h-32 overflow-y-auto">
+            <div className="mt-8 pt-6 border-t border-white/5">
+              <h4 className="font-semibold text-gray-300 mb-2">Resume Snippet</h4>
+              <div className="bg-slate-800/50 border border-white/5 p-4 rounded-lg text-xs text-gray-400 font-mono h-32 overflow-y-auto">
                 {selectedCandidate.resume_text ? selectedCandidate.resume_text.slice(0, 1000) + '...' : 'No resume text available.'}
               </div>
             </div>
@@ -422,7 +422,7 @@ const Candidates = () => {
             <div className="mt-6 flex justify-end space-x-3">
               {selectedCandidate.screening_status && (
                 <div className="flex items-center">
-                  <span className="text-sm text-gray-600 mr-2">Status:</span>
+                  <span className="text-sm text-gray-400 mr-2">Status:</span>
                   <span className={`px-3 py-1.5 inline-flex text-sm font-semibold rounded-full ${selectedCandidate.screening_status === 'selected' ? 'bg-green-100 text-green-800' :
                     selectedCandidate.screening_status === 'rejected' ? 'bg-red-100 text-red-800' :
                       selectedCandidate.screening_status === 'screened' ? 'bg-blue-100 text-blue-800' :
@@ -437,7 +437,7 @@ const Candidates = () => {
               )}
               <button
                 onClick={() => handleCall(selectedCandidate._id)}
-                className="flex items-center px-6 py-2.5 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:from-green-600 hover:to-blue-600 font-semibold shadow-md"
+                className="flex items-center px-6 py-2.5 bg-gradient-to-r from-green-600 to-indigo-600 text-white rounded-lg hover:from-green-500 hover:to-indigo-500 font-semibold shadow-lg shadow-indigo-900/20"
               >
                 <PhoneCall className="w-5 h-5 mr-2" />
                 Initiate AI Screening Call
