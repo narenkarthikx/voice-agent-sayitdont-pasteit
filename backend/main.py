@@ -18,6 +18,7 @@ app = FastAPI(title="Dinodial API", lifespan=lifespan)
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    "https://sayitdontpasteit.vercel.app",
 ]
 
 app.add_middleware(
