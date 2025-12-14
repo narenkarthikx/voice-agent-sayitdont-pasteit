@@ -81,94 +81,6 @@
 2. Fit score calculated (0-100) based on:
    - Skill match (40% weight)
    - Experience relevance (30% weight)
-   - Years of experience (30% weight)
-3. **Decision**: Auto-reject if score < 60, proceed if ≥ 60
-
-**Time**: ~10-30 seconds (background)
-
-**Benefits**: Saves money, filters unqualified candidates early
-
----
-
-### **Phase 2: Voice Screening** 📞
-**Purpose**: Verify real skill depth through conversation
-
-**Process**:
-1. AI voice agent calls qualified candidates
-2. Asks 3-5 experience-based questions
-3. Evaluates technical depth and communication
-4. No hints or teaching - pure assessment
-5. Asks availability and salary expectations
-
-**Time**: 4-6 minutes per call
-
-**Benefits**: Validates resume claims, assesses real knowledge
-
----
-
-### **Phase 3: Post-Call Analysis** 📊
-**Purpose**: Convert conversation into hiring decision
-
-**Process**:
-1. Fetch call details from voice API
-2. Extract AI evaluation (outcome, match score, skills assessment)
-3. Generate structured summary with:
-   - Technical strengths and weaknesses
-   - Communication quality
-   - Availability and salary details
-   - Final recommendation (shortlisted/rejected/on-hold)
-4. Auto-update candidate status
-
-**Time**: ~5-10 seconds
-
-**Benefits**: Clear hiring signals, no manual transcript review needed
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **React** 19.2.3 - UI framework
-- **React Router** 7.10.1 - Navigation
-- **Tailwind CSS** 3.4.17 - Styling
-- **Axios** - HTTP client
-- **WaveSurfer.js** - Audio waveform visualization
-- **React Toastify** - Notifications
-
-### Backend
-- **FastAPI** - High-performance Python web framework
-- **Motor** - Async MongoDB driver
-- **Pydantic** - Data validation
-- **python-jose** - JWT authentication
-- **bcrypt** - Password hashing
-- **Groq API** - LLM for resume parsing and pre-screening
-- **httpx** - Async HTTP client for voice API
-
-### Database
-- **MongoDB Atlas** - Cloud-hosted NoSQL database
-
-### External Services
-- **Dinodial Voice API** - AI voice calling service
-- **Groq LLM** - llama-3.3-70b-versatile for NLP tasks
-
----
-
-## 📦 Installation
-
-### Prerequisites
-- **Python** 3.10+
-- **Node.js** 18+
-- **MongoDB Atlas** account
-- **Groq API** key
-- **Dinodial Voice API** key
-
-### Clone Repository
-```bash
-git clone <repository-url>
-cd sayit-dont-pasteit
-```
-
----
 
 ## 🔑 Environment Setup
 
@@ -269,97 +181,6 @@ Frontend runs on: `http://localhost:3000`
 
 Interactive API documentation available at: `http://localhost:8000/docs`
 
----
-
-## 🌐 Deployment
-
-### **Recommended: Vercel (Frontend) + Railway/Render (Backend)**
-
-#### Why Vercel for Frontend?
-✅ **Automatic deployments** from Git  
-✅ **Serverless edge network** for fast global delivery  
-✅ **Zero configuration** for React apps  
-✅ **Built-in HTTPS** and custom domains  
-✅ **Free tier** with generous limits  
-✅ **Preview deployments** for every PR  
-
-#### Frontend Deployment (Vercel)
-
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-cd frontend
-vercel --prod
-```
-
-**Vercel Configuration** (create `vercel.json`):
-```json
-{
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "env": {
-    "REACT_APP_API_URL": "https://your-backend.railway.app/api"
-  },
-  "github": {
-    "silent": true
-  }
-}
-```
-
-#### Backend Deployment: Render (Free Tier) ✅
-
-**Why Render?**
-- ✅ **100% Free tier** - No credit card required
-- ✅ Auto-sleep after inactivity (wakes in ~30s)
-- ✅ Simple dashboard with live logs
-- ✅ Easy environment variables UI
-- ✅ Automatic HTTPS/SSL certificates
-- ✅ GitHub auto-deploy on push
-
-**Deploy via Render Website:**
-
-1. **Push backend to GitHub** (entire backend folder)
-
-2. **Go to [render.com](https://render.com)** → Sign up with GitHub
-
-3. **New → Web Service** → Connect your repository
-
-4. **Configure**:
-   - **Name**: `sayit-backend`
-   - **Root Directory**: Leave blank (or `backend` if monorepo)
-   - **Environment**: Python 3
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-   - **Plan**: Free
-
-5. **Add Environment Variables** (in dashboard):
-   ```
-   MONGO_DETAILS=mongodb+srv://...
-   SECRET_KEY=your-secret-key
-   ALGORITHM=HS256
-   ACCESS_TOKEN_EXPIRE_MINUTES=60
-   GROQ_API_KEY=your-groq-key
-   DINODIAL_PROXY_API_KEY=your-dinodial-key
-   ```
-
-6. **Deploy** → Copy your backend URL (e.g., `https://sayit-backend.onrender.com`)
-
-7. **Update Frontend** on Vercel with backend URL
-
-**⚠️ Important**: Free tier sleeps after 15 min inactivity. First request takes ~30s to wake up.
-
-**Alternative**: Railway (free but needs credit card verification)
-
-### Alternative: Netlify (Not Recommended)
-❌ Netlify is great for static sites but has limitations for React apps with routing  
-❌ Requires additional configuration for SPA routing  
-❌ Less seamless than Vercel for React  
-
----
-
 ## 📁 Project Structure
 
 ```
@@ -417,28 +238,6 @@ Password: password123
 
 ---
 
-## 🎨 UI Screenshots
-
-### Dashboard
-- Pre-screening analytics with average fit score
-- Voice screening statistics (completed, in-progress, shortlisted)
-- AI match score distribution
-- Top screened candidates
-
-### Candidate Pool
-- Pre-screen status badges (✓ Qualified / ✗ Rejected)
-- Fit scores (0-100)
-- Voice screening status
-- Initiate Call button (disabled for rejected candidates)
-
-### Call History
-- AI screening outcomes with badges
-- Match score indicators
-- Call recordings with waveform
-- Detailed assessment summaries
-
----
-
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -447,20 +246,6 @@ Password: password123
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open Pull Request
 
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-## 🙋 Support
-
-For issues or questions:
-- Open an issue on GitHub
-- Check API documentation at `/docs`
-- Review backend logs for debugging
 
 ---
 
@@ -474,6 +259,3 @@ For issues or questions:
 - [ ] Custom evaluation rubrics
 - [ ] Team collaboration features
 
----
-
-**Built with ❤️ for smarter recruiting**
