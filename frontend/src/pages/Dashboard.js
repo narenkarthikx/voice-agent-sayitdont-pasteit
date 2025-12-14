@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import api from '../services/api';
-import { PhoneCall, Users, CheckCircle, XCircle, Clock, TrendingUp, Award, Brain } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
+import { PhoneCall, Users, CheckCircle, XCircle, Clock, TrendingUp, Award, Brain, Activity, Calendar, Bot } from 'lucide-react';
 
 const Dashboard = () => {
+  const { user } = useContext(AuthContext);
   const [stats, setStats] = useState({
     total_calls: 0,
     total_candidates: 0,
@@ -35,212 +37,239 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <div>
-      <div className="mb-8 flex items-center justify-between">
+  const StatCard = ({ title, value, subtext, icon: Icon, colorClass }) => (
+    <div className="relative overflow-hidden bg-slate-800/50 backdrop-blur-sm border border-white/5 p-6 rounded-2xl group hover:border-white/10 transition-all duration-300">
+      <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${colorClass}`}>
+        <Icon className="w-24 h-24" />
+      </div>
+      <div className="relative z-10 flex flex-col h-full justify-between">
         <div>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
-            AI Voice Screening Dashboard
+          <div className={`p-2 w-fit rounded-lg mb-4 bg-white/5 ${colorClass}`}>
+            <Icon className="w-6 h-6 text-white" />
+          </div>
+          <p className="text-gray-400 text-sm font-medium">{title}</p>
+        </div>
+        <div>
+          <h3 className="text-3xl font-bold text-white mt-2">{value}</h3>
+          {subtext && <p className="text-xs text-gray-500 mt-1">{subtext}</p>}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-8 animate-fade-in">
+      {/* Welcome Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold text-white">
+            Welcome back, <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">{user?.username || 'User'}</span>
           </h2>
-          <p className="text-gray-600 mt-2 flex items-center">
-            <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-            Real-time automated candidate screening
-          </p>
+          <p className="text-gray-400 mt-1 text-sm">Here's what's happening with your recruitment pipeline today.</p>
         </div>
-        <div className="text-right">
-          <p className="text-sm text-gray-500">Last updated</p>
-          <p className="text-lg font-semibold text-gray-700">{new Date().toLocaleTimeString()}</p>
+        <div className="flex items-center space-x-2 bg-slate-800/80 px-4 py-2 rounded-lg border border-white/5">
+          <Calendar className="w-4 h-4 text-indigo-400" />
+          <span className="text-sm text-gray-300">{new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
         </div>
       </div>
 
-      {/* Pre-Screening Phase Banner */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-xl shadow-lg text-white mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-bold mb-2 flex items-center">
-              <Brain className="w-6 h-6 mr-2" />
-              Phase 1: AI Pre-Screening
-            </h3>
-            <p className="text-indigo-100 text-sm">Resume analysis before voice calls • Saves time & credits</p>
-          </div>
-          <div className="text-right">
-            <p className="text-5xl font-bold">{stats.avg_fit_score}<span className="text-2xl">/100</span></p>
-            <p className="text-indigo-100 text-xs mt-1">Average Fit Score</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <div className="bg-white bg-opacity-20 p-4 rounded-lg backdrop-blur-sm">
-            <p className="text-3xl font-bold">{stats.pre_screened_proceed}</p>
-            <p className="text-indigo-100 text-sm">✓ Qualified for Call</p>
-          </div>
-          <div className="bg-white bg-opacity-20 p-4 rounded-lg backdrop-blur-sm">
-            <p className="text-3xl font-bold">{stats.pre_screened_reject}</p>
-            <p className="text-indigo-100 text-sm">✗ Auto-Rejected</p>
-          </div>
-        </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          title="Total Candidates"
+          value={stats.total_candidates}
+          icon={Users}
+          colorClass="text-blue-500 bg-blue-500/20"
+        />
+        <StatCard
+          title="Active Calls"
+          value={stats.in_progress_calls}
+          subtext="Currently screening"
+          icon={PhoneCall}
+          colorClass="text-purple-500 bg-purple-500/20"
+        />
+        <StatCard
+          title="Shortlisted"
+          value={stats.shortlisted}
+          subtext={`${stats.high_match} High Match`}
+          icon={CheckCircle}
+          colorClass="text-green-500 bg-green-500/20"
+        />
+        <StatCard
+          title="Avg Functionality Score"
+          value={`${stats.avg_fit_score}%`}
+          icon={Activity}
+          colorClass="text-orange-500 bg-orange-500/20"
+        />
       </div>
 
-      {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-100 text-sm font-medium">Total Candidates</p>
-              <p className="text-4xl font-bold mt-2">{stats.total_candidates}</p>
-            </div>
-            <Users className="w-12 h-12 text-blue-200" />
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Column - Tech Skills & Recent Candidates */}
+        <div className="lg:col-span-2 space-y-8">
 
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-purple-100 text-sm font-medium">AI Calls Completed</p>
-              <p className="text-4xl font-bold mt-2">{stats.completed_calls}</p>
-              <p className="text-xs text-purple-200 mt-1">of {stats.total_calls} total</p>
+          {/* Pipeline Visual */}
+          <div className="bg-slate-800/40 backdrop-blur-md border border-white/5 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-bold text-white">Hiring Funnel</h3>
+                <p className="text-sm text-gray-500">Conversion rates across phases</p>
+              </div>
+              <div className="p-2 bg-white/5 rounded-lg">
+                <TrendingUp className="w-5 h-5 text-gray-400" />
+              </div>
             </div>
-            <PhoneCall className="w-12 h-12 text-purple-200" />
-          </div>
-        </div>
 
-        <div className="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl shadow-lg text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-green-100 text-sm font-medium">Shortlisted</p>
-              <p className="text-4xl font-bold mt-2">{stats.shortlisted}</p>
-              <p className="text-xs text-green-200 mt-1">AI Recommended</p>
+            <div className="grid grid-cols-3 gap-4">
+              {/* Step 1 */}
+              <div className="relative p-4 rounded-xl bg-gradient-to-br from-indigo-500/20 to-indigo-600/5 border border-indigo-500/20">
+                <div className="flex justify-between items-start mb-2">
+                  <Users className="w-5 h-5 text-indigo-400" />
+                  <span className="text-xs font-mono text-indigo-300/50">01</span>
+                </div>
+                <p className="text-2xl font-bold text-white">{stats.total_candidates}</p>
+                <p className="text-xs text-indigo-200">Applied</p>
+              </div>
+              {/* Step 2 */}
+              <div className="relative p-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/5 border border-purple-500/20">
+                <div className="flex justify-between items-start mb-2">
+                  <Brain className="w-5 h-5 text-purple-400" />
+                  <span className="text-xs font-mono text-purple-300/50">02</span>
+                </div>
+                <p className="text-2xl font-bold text-white">{stats.pre_screened_proceed}</p>
+                <p className="text-xs text-purple-200">Passed AI Screening</p>
+              </div>
+              {/* Step 3 */}
+              <div className="relative p-4 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/5 border border-green-500/20">
+                <div className="flex justify-between items-start mb-2">
+                  <Award className="w-5 h-5 text-green-400" />
+                  <span className="text-xs font-mono text-green-300/50">03</span>
+                </div>
+                <p className="text-2xl font-bold text-white">{stats.shortlisted}</p>
+                <p className="text-xs text-green-200">Shortlisted</p>
+              </div>
             </div>
-            <CheckCircle className="w-12 h-12 text-green-200" />
           </div>
-        </div>
 
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-xl shadow-lg text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-orange-100 text-sm font-medium">In Progress</p>
-              <p className="text-4xl font-bold mt-2">{stats.in_progress_calls}</p>
-              <p className="text-xs text-orange-200 mt-1">Live Screening</p>
+          {/* Recent Candidates */}
+          <div className="bg-slate-800/40 backdrop-blur-md border border-white/5 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-white">Top Candidates</h3>
+              <button className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">View All</button>
             </div>
-            <Clock className="w-12 h-12 text-orange-200 animate-pulse" />
-          </div>
-        </div>
-      </div>
 
-      {/* AI Screening Results */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Outcomes */}
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <div className="flex items-center mb-4">
-            <Brain className="w-6 h-6 text-purple-600 mr-2" />
-            <h3 className="text-lg font-bold text-gray-900">AI Screening Outcomes</h3>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center">
-                <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
-                <span className="font-medium text-gray-700">Shortlisted</span>
-              </div>
-              <span className="text-2xl font-bold text-green-600">{stats.shortlisted}</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-              <div className="flex items-center">
-                <Clock className="w-5 h-5 text-yellow-600 mr-3" />
-                <span className="font-medium text-gray-700">On Hold</span>
-              </div>
-              <span className="text-2xl font-bold text-yellow-600">{stats.on_hold}</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-              <div className="flex items-center">
-                <XCircle className="w-5 h-5 text-red-600 mr-3" />
-                <span className="font-medium text-gray-700">Rejected</span>
-              </div>
-              <span className="text-2xl font-bold text-red-600">{stats.rejected}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Match Scores */}
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <div className="flex items-center mb-4">
-            <TrendingUp className="w-6 h-6 text-blue-600 mr-2" />
-            <h3 className="text-lg font-bold text-gray-900">AI Match Scores</h3>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center">
-                <Award className="w-5 h-5 text-green-600 mr-3" />
-                <span className="font-medium text-gray-700">High Match</span>
-              </div>
-              <div className="text-right">
-                <span className="text-2xl font-bold text-green-600">{stats.high_match}</span>
-                <p className="text-xs text-gray-500">Strong technical skills</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-              <div className="flex items-center">
-                <Award className="w-5 h-5 text-yellow-600 mr-3" />
-                <span className="font-medium text-gray-700">Medium Match</span>
-              </div>
-              <div className="text-right">
-                <span className="text-2xl font-bold text-yellow-600">{stats.medium_match}</span>
-                <p className="text-xs text-gray-500">Basic understanding</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center">
-                <Award className="w-5 h-5 text-gray-600 mr-3" />
-                <span className="font-medium text-gray-700">Low Match</span>
-              </div>
-              <div className="text-right">
-                <span className="text-2xl font-bold text-gray-600">{stats.low_match}</span>
-                <p className="text-xs text-gray-500">Needs improvement</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Top Candidates */}
-      {stats.recent_top_candidates && stats.recent_top_candidates.length > 0 && (
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <div className="flex items-center mb-4">
-            <Award className="w-6 h-6 text-yellow-500 mr-2" />
-            <h3 className="text-lg font-bold text-gray-900">Top Screened Candidates</h3>
-            <span className="ml-auto text-sm text-gray-500">AI Shortlisted</span>
-          </div>
-          <div className="space-y-3">
-            {stats.recent_top_candidates.map((candidate, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-bold">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">{candidate.name}</p>
-                    <div className="flex gap-2 mt-1">
-                      {candidate.skills.map((skill, i) => (
-                        <span key={i} className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
-                          {skill}
-                        </span>
-                      ))}
+            <div className="space-y-4">
+              {stats.recent_top_candidates && stats.recent_top_candidates.length > 0 ? (
+                stats.recent_top_candidates.map((candidate, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all duration-200 group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white shadow-lg shadow-indigo-500/20">
+                        {candidate.name?.charAt(0) || 'C'}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">{candidate.name}</h4>
+                        <div className="flex gap-2 mt-1">
+                          {candidate.skills?.slice(0, 3).map((skill, i) => (
+                            <span key={i} className="text-[10px] px-1.5 py-0.5 bg-slate-700 text-gray-300 rounded border border-white/10">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${candidate.match_score === 'high'
+                        ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                        : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                        }`}>
+                        {candidate.match_score?.toUpperCase()} MATCH
+                      </span>
+                      <p className="text-[10px] text-gray-500 mt-1">
+                        {candidate.call_date ? new Date(candidate.call_date).toLocaleDateString() : 'Recently'}
+                      </p>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Users className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                  <p>No candidates processed yet.</p>
                 </div>
-                <div className="text-right">
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    candidate.match_score === 'high' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {candidate.match_score} match
-                  </span>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {candidate.call_date ? new Date(candidate.call_date).toLocaleDateString() : 'Recently'}
-                  </p>
-                </div>
-              </div>
-            ))}
+              )}
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Right Column - Secondary Stats */}
+        <div className="space-y-8">
+          {/* Call Outcomes */}
+          <div className="bg-slate-800/40 backdrop-blur-md border border-white/5 rounded-2xl p-6">
+            <h3 className="text-lg font-bold text-white mb-6">Call Outcomes</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10 border border-green-500/10 hover:border-green-500/30 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-md bg-green-500/20 text-green-400">
+                    <CheckCircle className="w-4 h-4" />
+                  </div>
+                  <span className="text-sm text-gray-300">Shortlisted</span>
+                </div>
+                <span className="text-lg font-bold text-white">{stats.shortlisted}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg bg-orange-500/10 border border-orange-500/10 hover:border-orange-500/30 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-md bg-orange-500/20 text-orange-400">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                  <span className="text-sm text-gray-300">On Hold</span>
+                </div>
+                <span className="text-lg font-bold text-white">{stats.on_hold}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg bg-red-500/10 border border-red-500/10 hover:border-red-500/30 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-md bg-red-500/20 text-red-400">
+                    <XCircle className="w-4 h-4" />
+                  </div>
+                  <span className="text-sm text-gray-300">Rejected</span>
+                </div>
+                <span className="text-lg font-bold text-white">{stats.rejected}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Agent Status */}
+          <div className="bg-gradient-to-br from-indigo-900/40 to-indigo-950/40 backdrop-blur-md border border-indigo-500/20 rounded-2xl p-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl -mr-8 -mt-8"></div>
+
+            <h3 className="text-lg font-bold text-white mb-4 relative z-10 flex items-center">
+              <Bot className="w-5 h-5 mr-2 text-indigo-400" />
+              AI Agent Status
+            </h3>
+
+            <div className="relative z-10 space-y-4">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-400">Status</span>
+                <span className="flex items-center text-green-400 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse"></span>
+                  Online & active
+                </span>
+              </div>
+
+              <div className="w-full bg-slate-800/50 rounded-full h-2 overflow-hidden">
+                <div className="bg-indigo-500 h-full rounded-full w-[35%]"></div>
+              </div>
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Load: 35%</span>
+                <span>{stats.in_progress_calls} Active Calls</span>
+              </div>
+
+              <button className="w-full py-2.5 mt-4 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow-lg shadow-indigo-900/20">
+                View Agent Logs
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
