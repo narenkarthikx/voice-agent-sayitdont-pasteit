@@ -100,51 +100,51 @@ const Candidates = () => {
         </div>
       </div>
 
-      <div className="mb-4 flex space-x-4">
-        <div className="flex-1 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <p className="text-sm text-gray-500">Total Candidates</p>
-          <p className="text-2xl font-bold text-gray-900">{candidates.length}</p>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/5 p-4 rounded-xl">
+          <p className="text-sm text-gray-400">Total Candidates</p>
+          <p className="text-2xl font-bold text-white">{candidates.length}</p>
         </div>
-        <div className="flex-1 bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg shadow-sm border border-green-200">
-          <p className="text-sm text-green-700 font-semibold">✓ Pre-Qualified</p>
-          <p className="text-2xl font-bold text-green-600">
+        <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-xl">
+          <p className="text-sm text-green-400 font-semibold">✓ Pre-Qualified</p>
+          <p className="text-2xl font-bold text-green-300">
             {candidates.filter(c => c.pre_screen_status === 'proceed').length}
           </p>
         </div>
-        <div className="flex-1 bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg shadow-sm border border-red-200">
-          <p className="text-sm text-red-700 font-semibold">✗ Pre-Rejected</p>
-          <p className="text-2xl font-bold text-red-600">
+        <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl">
+          <p className="text-sm text-red-400 font-semibold">✗ Pre-Rejected</p>
+          <p className="text-2xl font-bold text-red-300">
             {candidates.filter(c => c.pre_screen_status === 'reject').length}
           </p>
         </div>
-        <div className="flex-1 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-          <p className="text-sm text-gray-500">Voice Screened</p>
-          <p className="text-2xl font-bold text-blue-600">
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/5 p-4 rounded-xl">
+          <p className="text-sm text-gray-400">Voice Screened</p>
+          <p className="text-2xl font-bold text-indigo-400">
             {candidates.filter(c => c.screening_status).length}
           </p>
         </div>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-white/5 rounded-xl overflow-hidden">
+        <table className="min-w-full divide-y divide-white/5">
+          <thead className="bg-slate-900/50">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-50">Candidate</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-50">Applied For</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-50">Key Skills</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-50">Pre-Screen</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-50">Voice Status</th>
-              <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider bg-gray-50">Actions</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Candidate</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Applied For</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Key Skills</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Pre-Screen</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Voice Status</th>
+              <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-slate-800/30 divide-y divide-white/5">
             {candidates.map((candidate) => {
               const jobTitle = jobs.find(j => j._id === candidate.job_id)?.title || 'General';
               return (
-                <tr key={candidate._id} className="hover:bg-blue-50 transition-colors border-b border-gray-100">
+                <tr key={candidate._id} className="hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg mr-3 shadow-lg shadow-indigo-500/20">
                         {candidate.fullName.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -165,12 +165,12 @@ const Candidates = () => {
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-1.5">
                       {candidate.skills.slice(0, 3).map((skill, index) => (
-                        <span key={index} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200">
+                        <span key={index} className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
                           {skill}
                         </span>
                       ))}
                       {candidate.skills.length > 3 && (
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-500 text-white">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-600 text-white">
                           +{candidate.skills.length - 3} more
                         </span>
                       )}
@@ -180,7 +180,7 @@ const Candidates = () => {
                     {candidate.pre_screen_status ? (
                       <div>
                         <span className={`px-3 py-1.5 inline-flex text-xs leading-5 font-bold rounded-full ${candidate.pre_screen_status === 'proceed' ? 'bg-green-100 text-green-800 border border-green-300' :
-                            'bg-red-100 text-red-800 border border-red-300'
+                          'bg-red-100 text-red-800 border border-red-300'
                           }`}>
                           {candidate.pre_screen_status === 'proceed' ? '✓ Qualified' : '✗ Rejected'}
                         </span>
@@ -198,9 +198,9 @@ const Candidates = () => {
                     {candidate.screening_status ? (
                       <div>
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${candidate.screening_status === 'selected' ? 'bg-green-100 text-green-800' :
-                            candidate.screening_status === 'rejected' ? 'bg-red-100 text-red-800' :
-                              candidate.screening_status === 'screened' ? 'bg-blue-100 text-blue-800' :
-                                'bg-gray-100 text-gray-800'
+                          candidate.screening_status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            candidate.screening_status === 'screened' ? 'bg-blue-100 text-blue-800' :
+                              'bg-gray-100 text-gray-800'
                           }`}>
                           {candidate.screening_status === 'selected' ? '✓ Selected' :
                             candidate.screening_status === 'rejected' ? '✗ Rejected' :
@@ -208,8 +208,8 @@ const Candidates = () => {
                         </span>
                         {candidate.last_match_score && (
                           <span className={`ml-2 text-xs ${candidate.last_match_score === 'high' ? 'text-green-600' :
-                              candidate.last_match_score === 'medium' ? 'text-yellow-600' :
-                                'text-gray-600'
+                            candidate.last_match_score === 'medium' ? 'text-yellow-600' :
+                              'text-gray-600'
                             }`}>
                             ({candidate.last_match_score})
                           </span>
@@ -232,8 +232,8 @@ const Candidates = () => {
                         onClick={() => handleCall(candidate._id)}
                         disabled={candidate.pre_screen_status === 'reject'}
                         className={`px-3 py-1.5 rounded-lg flex items-center text-xs font-semibold shadow-sm ${candidate.pre_screen_status === 'reject'
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600'
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600'
                           }`}
                         title={candidate.pre_screen_status === 'reject' ? 'Pre-screening failed' : 'Initiate AI Screening Call'}
                       >
@@ -248,7 +248,7 @@ const Candidates = () => {
           </tbody>
         </table>
         {candidates.length === 0 && (
-          <div className="p-6 text-center text-gray-500">
+          <div className="p-6 text-center text-gray-400">
             No candidates found. Upload a resume to get started.
           </div>
         )}
@@ -330,8 +330,8 @@ const Candidates = () => {
             {/* Pre-Screening Banner */}
             {selectedCandidate.pre_screen_status && (
               <div className={`mb-6 p-4 rounded-xl border-2 ${selectedCandidate.pre_screen_status === 'proceed'
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-red-50 border-red-200'
+                ? 'bg-green-50 border-green-200'
+                : 'bg-red-50 border-red-200'
                 }`}>
                 <div className="flex justify-between items-start">
                   <div>
@@ -424,9 +424,9 @@ const Candidates = () => {
                 <div className="flex items-center">
                   <span className="text-sm text-gray-600 mr-2">Status:</span>
                   <span className={`px-3 py-1.5 inline-flex text-sm font-semibold rounded-full ${selectedCandidate.screening_status === 'selected' ? 'bg-green-100 text-green-800' :
-                      selectedCandidate.screening_status === 'rejected' ? 'bg-red-100 text-red-800' :
-                        selectedCandidate.screening_status === 'screened' ? 'bg-blue-100 text-blue-800' :
-                          'bg-gray-100 text-gray-800'
+                    selectedCandidate.screening_status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      selectedCandidate.screening_status === 'screened' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
                     }`}>
                     {selectedCandidate.screening_status === 'selected' ? '✓ Selected by AI' :
                       selectedCandidate.screening_status === 'rejected' ? '✗ Not Selected' :
