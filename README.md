@@ -70,14 +70,44 @@
 
 ## 🎭 3-Phase AI Screening
 
+
 ### **Phase 1: Pre-Call Screening** 🔍
 **Purpose**: Filter candidates before spending voice credits
 
-**Process**:
+**Process:**
 1. Resume uploaded → LLM analyzes against job requirements
 2. Fit score calculated (0-100) based on:
    - Skill match (40% weight)
    - Experience relevance (30% weight)
+   - Years of experience (30% weight)
+3. Auto-reject if score < 60, proceed if ≥ 60
+
+---
+
+### **Phase 2: Voice Screening** 📞
+**Purpose:** Assess real skills and communication through a live AI voice call
+
+**Process:**
+1. AI voice agent calls qualified candidates
+2. Asks 3-5 targeted, experience-based questions
+3. Evaluates technical depth and communication
+4. No hints or teaching—pure assessment
+5. Asks about availability and salary expectations
+
+---
+
+### **Phase 3: Post-Call Analysis** 📊
+**Purpose:** Summarize and score the call for final decision-making
+
+**Process:**
+1. Fetch call details and transcript from the voice API
+2. Extract AI evaluation (outcome, match score, skills assessment)
+3. Generate a structured summary:
+   - Technical strengths and weaknesses
+   - Communication quality
+   - Availability and salary details
+   - Final recommendation (shortlisted/rejected/on-hold)
+4. Auto-update candidate status
 
 ## 🔑 Environment Setup
 
