@@ -28,9 +28,7 @@ export const AuthProvider = ({ children }) => {
     formData.append('password', password);
 
     try {
-      const response = await api.post('/auth/login', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await api.post('/auth/login', formData);
       const { access_token } = response.data;
       localStorage.setItem('token', access_token);
       const decoded = jwtDecode(access_token);

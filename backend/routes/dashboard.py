@@ -25,20 +25,21 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     in_progress_calls = await calls_collection.count_documents({"status": "In-Progress"})
     
     # Outcome-based stats (Phase 3)
-    shortlisted = await calls_collection.count_documents({"outcome": "shortlisted"})
-    rejected = await calls_collection.count_documents({"outcome": "rejected"})
-    on_hold = await calls_collection.count_documents({"outcome": "on_hold"})
+    # Outcome-based stats (Phase 3) - Case insensitive
+    shortlisted = await calls_collection.count_documents({"outcome": {"$regex": "^shortlisted$", "$options": "i"}})
+    rejected = await calls_collection.count_documents({"outcome": {"$regex": "^rejected$", "$options": "i"}})
+    on_hold = await calls_collection.count_documents({"outcome": {"$regex": "^on_hold|on-hold$", "$options": "i"}})
     
-    # Match score stats
-    high_match = await calls_collection.count_documents({"match_score": "high"})
-    medium_match = await calls_collection.count_documents({"match_score": "medium"})
-    low_match = await calls_collection.count_documents({"match_score": "low"})
+    # Match score stats - Case insensitive
+    high_match = await calls_collection.count_documents({"match_score": {"$regex": "^high$", "$options": "i"}})
+    medium_match = await calls_collection.count_documents({"match_score": {"$regex": "^medium$", "$options": "i"}})
+    low_match = await calls_collection.count_documents({"match_score": {"$regex": "^low$", "$options": "i"}})
     
     # Recent top candidates (last 5 shortlisted with high match)
     recent_top_candidates = []
     cursor = calls_collection.find({
-        "outcome": "shortlisted",
-        "match_score": {"$in": ["high", "medium"]}
+        "outcome": {"$regex": "^shortlisted$", "$options": "i"},
+        "match_score": {"$in": ["high", "medium", "High", "Medium", "HIGH", "MEDIUM"]}
     }).sort("end_time", -1).limit(5)
     
     async for call in cursor:

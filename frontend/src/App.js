@@ -27,12 +27,15 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+import LandingPage from './pages/LandingPage';
+
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<Navigate to="/" replace />} />
+      <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+        <Route index element={<Navigate to="/app/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="jobs" element={<Jobs />} />
         <Route path="candidates" element={<Candidates />} />

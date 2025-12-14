@@ -241,7 +241,93 @@ async def trigger_call(id: str, current_user: dict = Depends(get_current_user)):
             },
             "description": "Extract structured evaluation data from voice screening call. Be specific and factual in all fields."
         }
+        async with httpx.AsyncClient() as client:
+            dinodial_api_key = os.getenv("DINODIAL_PROXY_API_KEY")
+            if not dinodial_api_key:
+                raise HTTPException(status_code=500, detail="DINODIAL_PROXY_API_KEY not configured")
 
-        # ...existing code for making the call and saving to DB...
+            try:
+                # 1. Create Call in MongoDB (Pending)
+                new_call = {
+                    "candidate_id": str(candidate["_id"]),
+                    "status": "In-Progress",
+                    "start_time": datetime.utcnow(),
+                    "external_call_id": "pending-response",
+                    "summary": "Call initiated...",
+                    "transcript": "",
+                    "outcome": "pending",
+                    "match_score": "pending"
+                }
+                call_result = await calls_collection.insert_one(new_call)
+                call_id = call_result.inserted_id
 
-    # ...existing code for making the call and saving to DB...
+                response = await client.post(
+                    "https://api-dinodial-proxy.cyces.co/api/proxy/make-call/",
+                    headers={
+                        "Authorization": f"Bearer {dinodial_api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "phoneNumber": candidate.get("phone"),
+                        "systemPrompt": prompt,  # We use the detailed prompt constructed above
+                        "initialMessage": f"Hi {candidate_name}, this is Anitha from Say It Don't Paste It. I'm calling about the {job_details} opportunity. Is this a good time for a quick 4-minute chat?",
+                        "tools": [evaluation_tool], # Pass the evaluation tool
+                        "voice": "Anitha", # or other available voices
+                        "maxDuration": 5 # minutes
+                    },
+                    timeout=30.0
+                )
+                
+                # Check raw content first for debugging
+                print(f"DEBUG: Raw API Response: {response.text}")
+
+                try:
+                    response_data = response.json()
+                except Exception as json_err:
+                     print(f"CRITICAL: Failed to parse JSON from Voice API. Status: {response.status_code}. Raw: {response.text}")
+                     await calls_collection.update_one(
+                        {"_id": call_id},
+                        {"$set": {"status": "Failed", "summary": f"API Error (Invalid JSON): {response.text[:100]}..."}}
+                    )
+                     raise HTTPException(status_code=500, detail=f"Voice API returned invalid JSON: {response.text[:50]}")
+
+                if response.status_code not in [200, 201]:
+                    # Mark optional failure
+                    error_msg = response_data.get('detail') or response_data.get('message') or response_data.get('error') or response.text
+                    
+                    # Handle Rate Limits specifically
+                    if "Rate limit exceeded" in str(error_msg) or response.status_code == 429:
+                         await calls_collection.update_one(
+                            {"_id": call_id},
+                            {"$set": {"status": "Failed", "summary": "Failed: API Rate Limit Exceeded (Wait 1m)"}}
+                        )
+                         raise HTTPException(status_code=429, detail="Rate limit exceeded. Please wait 1 minute before starting another call.")
+
+                    await calls_collection.update_one(
+                        {"_id": call_id},
+                        {"$set": {"status": "Failed", "summary": f"Failed to initiate: {error_msg}"}}
+                    )
+                    raise HTTPException(status_code=500, detail=f"Voice API Error: {error_msg}")
+                
+                # Get external ID
+                external_id = response_data.get("data", {}).get("call_id")
+                
+                if not external_id:
+                     await calls_collection.update_one(
+                        {"_id": call_id},
+                        {"$set": {"status": "Failed", "summary": "API returned success but no call_id found"}}
+                    )
+                     raise HTTPException(status_code=500, detail="Voice API did not return a call_id")
+
+                # Update call with external ID
+                await calls_collection.update_one(
+                    {"_id": call_id},
+                    {"$set": {"external_call_id": external_id}}
+                )
+
+                return {"message": "Call initiated successfully", "call_id": str(call_id), "external_id": external_id}
+
+            except Exception as e:
+                print(f"Error initiating call: {e}")
+                # Clean up if call wasn't created properly
+                raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")

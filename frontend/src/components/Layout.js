@@ -10,7 +10,7 @@ const Layout = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   const isActive = (path) => location.pathname === path;
@@ -25,7 +25,7 @@ const Layout = () => {
               <Bot className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white leading-tight">Say It!<br/>Don't Paste It</h1>
+              <h1 className="text-xl font-bold text-white leading-tight">Say It!<br />Don't Paste It</h1>
               <p className="text-xs text-blue-200">AI Voice Screening</p>
             </div>
           </div>
@@ -34,40 +34,36 @@ const Layout = () => {
           </div>
         </div>
         <nav className="mt-6 px-3">
-          <Link to="/dashboard" className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all ${
-            isActive('/dashboard') 
-              ? 'bg-blue-600 text-white shadow-lg' 
+          <Link to="/app/dashboard" className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all ${isActive('/app/dashboard')
+              ? 'bg-blue-600 text-white shadow-lg'
               : 'text-blue-100 hover:bg-blue-800 hover:text-white'
-          }`}>
+            }`}>
             <LayoutDashboard className="w-5 h-5 mr-3" />
             <span className="font-medium">Screening Dashboard</span>
           </Link>
-          <Link to="/jobs" className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all ${
-            isActive('/jobs') 
-              ? 'bg-blue-600 text-white shadow-lg' 
+          <Link to="/app/jobs" className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all ${isActive('/app/jobs')
+              ? 'bg-blue-600 text-white shadow-lg'
               : 'text-blue-100 hover:bg-blue-800 hover:text-white'
-          }`}>
+            }`}>
             <Target className="w-5 h-5 mr-3" />
             <span className="font-medium">Open Positions</span>
           </Link>
-          <Link to="/candidates" className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all ${
-            isActive('/candidates') 
-              ? 'bg-blue-600 text-white shadow-lg' 
+          <Link to="/app/candidates" className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all ${isActive('/app/candidates')
+              ? 'bg-blue-600 text-white shadow-lg'
               : 'text-blue-100 hover:bg-blue-800 hover:text-white'
-          }`}>
+            }`}>
             <Users className="w-5 h-5 mr-3" />
             <span className="font-medium">Candidate Pool</span>
           </Link>
-          <Link to="/calls" className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all ${
-            isActive('/calls') 
-              ? 'bg-blue-600 text-white shadow-lg' 
+          <Link to="/app/calls" className={`flex items-center px-4 py-3 mb-2 rounded-lg transition-all ${isActive('/app/calls')
+              ? 'bg-blue-600 text-white shadow-lg'
               : 'text-blue-100 hover:bg-blue-800 hover:text-white'
-          }`}>
+            }`}>
             <Phone className="w-5 h-5 mr-3" />
             <span className="font-medium">Screening History</span>
           </Link>
         </nav>
-        
+
         <div className="absolute bottom-0 w-72 p-6 border-t border-blue-700 bg-indigo-950">
           <div className="mb-4 p-3 bg-green-900 bg-opacity-30 rounded-lg border border-green-700">
             <p className="text-xs text-green-300 font-semibold">🤖 AI Voice Agent Active</p>

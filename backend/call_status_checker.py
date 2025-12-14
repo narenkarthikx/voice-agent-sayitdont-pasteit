@@ -41,7 +41,7 @@ async def check_call_status():
                 print("Candidate ID: ", candidate_id)
                 print("External Call ID: ", external_call_id)
                 # Handle Real External Calls
-                if external_call_id and not str(external_call_id).startswith("mock-"):
+                if external_call_id and external_call_id != "pending-response" and not str(external_call_id).startswith("mock-"):
                     if not api_key:
                         print(f"Skipping check for {call_id}: No API Key")
                         continue
@@ -141,20 +141,22 @@ async def check_call_status():
                                     
                                     # Construct comprehensive summary - handle empty data gracefully
                                     if outcome == "incomplete":
-                                        # For incomplete calls, fill each field with a user-friendly default if missing (no emoji)
+                                        # For incomplete calls, we try to be as helpful as possible
                                         final_summary = f"""OUTCOME: {outcome.upper()}
-MATCH SCORE: {match_score.upper() if match_score else 'Not available – call incomplete'}
-AVAILABILITY: {availability if availability else 'Not available – call incomplete'}
-CURRENT CTC: {current_ctc if current_ctc else 'Not available – call incomplete'}
-EXPECTED CTC: {expected_ctc if expected_ctc else 'Not available – call incomplete'}
-CALL END: {call_end_reason if call_end_reason else 'Not available – call incomplete'}
+MATCH SCORE: {match_score.upper() if match_score else 'Not assessed (Call incomplete)'}
+AVAILABILITY: {availability if availability else 'Not gathered'}
+CURRENT CTC: {current_ctc if current_ctc else 'Not gathered'}
+EXPECTED CTC: {expected_ctc if expected_ctc else 'Not gathered'}
+CALL END: {call_end_reason if call_end_reason else 'Unknown'}
 
 SKILLS ASSESSMENT:
-{skills_assessment if skills_assessment else 'Not available – call incomplete'}
+{skills_assessment if skills_assessment else 'Assessment could not be completed due to early call termination.'}
 
 DETAILED SUMMARY:
-{summary_text if summary_text else 'Call ended before AI screening could be completed. No detailed summary available.'}"""
-                                        transcript_text = None  # Remove transcript for incomplete calls
+{summary_text if summary_text else 'Call ended before full screening. Please check the transcript below for the partial conversation.'}"""
+                                        # Keep transcript for incomplete calls so user can see what happened
+                                        if not transcript_text:
+                                            transcript_text = "Call ended early - no transcript available."
                                     else:
                                         final_summary = f"""OUTCOME: {outcome.upper()}
 MATCH SCORE: {match_score.upper() if match_score else 'Not Assessed'}
@@ -167,7 +169,7 @@ SKILLS ASSESSMENT:
 {skills_assessment or 'Assessment not completed - call ended early'}
 
 DETAILED SUMMARY:
-{summary_text or 'Summary not generated - call ended prematurely'}"""
+{summary_text or 'Summary not generated - possible early termination'}"""
 
                                     # Get recording URL - check multiple possible field names
                                     recording_url = (
