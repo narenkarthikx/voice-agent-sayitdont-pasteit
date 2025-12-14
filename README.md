@@ -14,12 +14,9 @@
 - [Overview](#-overview)
 - [Key Features](#-key-features)
 - [3-Phase AI Screening](#-3-phase-ai-screening)
-- [Tech Stack](#-tech-stack)
-- [Installation](#-installation)
 - [Environment Setup](#-environment-setup)
 - [Running the Application](#-running-the-application)
 - [API Documentation](#-api-documentation)
-- [Deployment](#-deployment)
 - [Project Structure](#-project-structure)
 - [Demo Credentials](#-demo-credentials)
 
